@@ -51,7 +51,7 @@ def main():
     elif path == "/user-agent":
         req_param = headers.get("User-Agent")
 
-    if req_param is not None and user_agent is not None:
+    if req_param is not None:
         # response
         response_line = status_ok
         headers = {
