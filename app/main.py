@@ -1,6 +1,43 @@
 # Uncomment this to pass the first stage
 import socket
+import threading
 
+def handle_client(client_socket):
+    try:
+        request_data = client_socket.recv(1024).decode('utf-8')
+        response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 0\r\n\r\n"
+        client_socket.sendall(response.encode('utf-8'))
+    finally:
+        client_socket.close()
+
+def parse_request(request_data):
+    lines = request_data.split('\r\n')
+    request_line = lines[0].split(' ')
+    method, path, version = request_line
+
+    headers = {}
+    body = None
+    for line in lines[1:]:
+        if line == '':
+            body_index = lines.index(line) + 1
+            body = '\r\n'.join(lines[body_index:])
+            break
+        header_key, header_value = line.split(': ', 1)
+        headers[header_key] = header_value
+
+    return {
+        "method": method,
+        "path": path,
+        "version": version,
+        "headers": headers,
+        "body": body
+    }
+
+def response(client_socket, status, headers, body):
+    response_line = f"HTTP/1.1 {status}\r\n"
+    headers_str = ''.join(f'{key}: {value}\r\n' for key, value in headers.items())
+    res = response_line + headers_str + '\r\n' + body
+    client_socket.sendall(res.encode('utf-8'))
 
 def main():
     # You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -10,68 +47,11 @@ def main():
     #
     server_socket = socket.create_server(("localhost", 4221), reuse_port=True)
     # server_socket.accept() # wait for client
-    client_socket, addr = server_socket.accept()  # Unpack the tuple
-    request_data = client_socket.recv(1024).decode('utf-8')
-
-    lines = request_data.split('\r\n')
-    request_line = lines[0].split(' ')
-    method = request_line[0]
-    path = request_line[1]
-    version = request_line[2]
-
-    headers = {}
-    body = None
-
-    for line in lines[1:]:
-        if line == '':
-            body_index = lines.index(line) + 1
-            body = '\r\n'.join(lines[body_index:])
-            break
-        header = line.split(': ')
-        headers[header[0]] = header[1]
-
-    # print headers
-    print(headers)
-
-    status_ok = "HTTP/1.1 200 OK\r\n"
-    status_not_found = "HTTP/1.1 404 Not Found\r\n\r\n"
-
-    # Check if "/echo/" is in path
-    req_param = None
-    user_agent = headers.get("User-Agent")
-
-    if path == "/":
-        response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 0\r\n\r\n"
-        client_socket.sendall(response.encode('utf-8'))
-        req_param = path.split("/")[1]
-    elif "/echo/" in path:
-        req_param = path.split("/echo/")[1]
-
-        print(req_param)
-    elif path == "/user-agent":
-        req_param = headers.get("User-Agent")
-
-    if req_param is not None:
-        # response
-        response_line = status_ok
-        headers = {
-            "Content-Type": "text/plain",
-            "Content-Length": len(req_param)
-        }
-
-        response_body = req_param
-
-        # Construct headers
-        headers_str = ''.join(f'{key}: {value}\r\n' for key, value in headers.items())
-
-        # Construct final response
-        response = response_line + headers_str + '\r\n' + response_body
-
-        client_socket.sendall(response.encode('utf-8'))
-    else:
-        print(req_param)
-        response = status_not_found
-        client_socket.sendall(response.encode('utf-8'))
+    while True:
+        client_socket, addr = server_socket.accept()
+        print(f"Accepted connection from {addr}")
+        client_thread = threading.Thread(target=handle_client, args=(client_socket,))
+        client_thread.start()
 
 
 if __name__ == "__main__":
