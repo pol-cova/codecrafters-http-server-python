@@ -23,7 +23,7 @@ def handle_client(client_socket):
             body = parsed_request["headers"].get("User-Agent", "")
             headers["Content-Length"] = str(len(body))
             response(client_socket, status, headers, body)
-        elif "/files" in parsed_request["path"]:
+        elif "/files/" in parsed_request["path"]:
             try:
                 with open(parsed_request["path"].replace("/files/", ""), "r") as f:
                     body = f.read()
