@@ -26,7 +26,7 @@ def handle_client(client_socket):
         if parsed_request["method"] == "POST" and parsed_request["path"].startswith("/files/"):
             filename = parsed_request["path"].split("/files/")[1]
             content_length = int(parsed_request["headers"].get("Content-Length", 0))
-            body = client_socket.recv(content_length).decode('utf-8')
+            body = parsed_request["body"]
 
             file_path = os.path.join(directory_path, filename)
             try:
