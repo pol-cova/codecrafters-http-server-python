@@ -38,24 +38,26 @@ def main():
 
     # Check if "/echo/" is in path
     req_param = None
+    user_agent = headers.get("User-Agent")
 
     if path == "/":
         response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 0\r\n\r\n"
         client_socket.sendall(response.encode('utf-8'))
-
-    req_param = path.split("/")[1]
-
-    user_agent = headers.get("User-Agent")
+        req_param = path.split("/")[1]
+    elif path == "/echo/":
+        req_param = path.split("/echo/")[1]
+    elif path == "/user-agent":
+        req_param = headers.get("User-Agent")
 
     if req_param is not None and user_agent is not None:
         # response
         response_line = status_ok
         headers = {
             "Content-Type": "text/plain",
-            "Content-Length": len(user_agent)
+            "Content-Length": len(req_param)
         }
 
-        response_body = user_agent
+        response_body = req_param
 
         # Construct headers
         headers_str = ''.join(f'{key}: {value}\r\n' for key, value in headers.items())
