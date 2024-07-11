@@ -33,27 +33,32 @@ def main():
     status_ok = "HTTP/1.1 200 OK\r\n"
     status_not_found = "HTTP/1.1 404 Not Found\r\n\r\n"
 
-    req_param = path.split("/echo/")[1]
+    # Check if "/echo/" is in path
+    if "/echo/" in path:
+        req_param = path.split("/echo/")[1]
+    else:
+        req_param = None
 
-    # response
-    response_line = status_ok
-    headers = {
-        "Content-Type": "text/plain",
-        "Content-Length": len(req_param)
-    }
+    if req_param is not None:
+        # response
+        response_line = status_ok
+        headers = {
+            "Content-Type": "text/plain",
+            "Content-Length": len(req_param)
+        }
 
-    response_body = req_param
+        response_body = req_param
 
-    # Construct headers string
-    headers_str = ''.join(f'{key}: {value}\r\n' for key, value in headers.items())
+        # Construct headers
+        headers_str = ''.join(f'{key}: {value}\r\n' for key, value in headers.items())
 
-    # Construct final response
-    response = response_line + headers_str + '\r\n' + response_body
+        # Construct final response
+        response = response_line + headers_str + '\r\n' + response_body
 
-    client_socket.sendall(response.encode('utf-8'))
-
-
-
+        client_socket.sendall(response.encode('utf-8'))
+    else:
+        response = status_not_found
+        client_socket.sendall(response.encode('utf-8'))
 
 
 if __name__ == "__main__":
