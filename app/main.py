@@ -34,10 +34,14 @@ def main():
     status_not_found = "HTTP/1.1 404 Not Found\r\n\r\n"
 
     # Check if "/echo/" is in path
-    if "/echo/" in path:
+    req_param = None
+
+    if path == "/":
+        response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 0\r\n\r\n"
+        client_socket.sendall(response.encode('utf-8'))
+
+    elif "/echo/" in path:
         req_param = path.split("/echo/")[1]
-    else:
-        req_param = None
 
     if req_param is not None:
         # response
