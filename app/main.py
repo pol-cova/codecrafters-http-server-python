@@ -47,6 +47,7 @@ def main():
     elif "/echo/" in path:
         req_param = path.split("/echo/")[1]
 
+        print(req_param)
     elif path == "/user-agent":
         req_param = headers.get("User-Agent")
 
@@ -68,6 +69,7 @@ def main():
 
         client_socket.sendall(response.encode('utf-8'))
     else:
+        print(req_param)
         response = status_not_found
         client_socket.sendall(response.encode('utf-8'))
 
