@@ -7,7 +7,7 @@ def handle_client(client_socket):
         request_data = client_socket.recv(1024).decode('utf-8')
         parsed_request = parse_request(request_data)
 
-        status = 200
+        status = "200 OK"
         headers = {
             "Content-Type": "text/plain",
             "Content-Length": "0"
