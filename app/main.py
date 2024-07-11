@@ -5,8 +5,22 @@ import threading
 def handle_client(client_socket):
     try:
         request_data = client_socket.recv(1024).decode('utf-8')
-        response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 0\r\n\r\n"
-        client_socket.sendall(response.encode('utf-8'))
+        parsed_request = parse_request(request_data)
+
+        status = 200
+        headers = {
+            "Content-Type": "text/plain",
+            "Content-Length": "0"
+        }
+        body = ""
+        if "/echo/" in request_data["path"]:
+            body = request_data["path"].replace("/echo/", "")
+            headers["Content-Length"] = str(len(body))
+        elif "/user-agent" in request_data["path"]:
+            body = parsed_request["headers"]["User-Agent"]
+            headers["Content-Length"] = str(len(body))
+        response(client_socket, status, headers, body)
+
     finally:
         client_socket.close()
 
