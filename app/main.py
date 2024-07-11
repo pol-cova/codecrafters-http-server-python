@@ -22,6 +22,36 @@ def handle_client(client_socket):
             "Content-Length": "0"
         }
         body = ""
+
+        if request_data["method"] == "POST":
+            filename = parsed_request["path"].split("/files/")[1]
+            content_type = parsed_request["headers"].get("Content-Type")
+            content_length = int(parsed_request["headers"].get("Content-Length", 0))
+
+            if content_type == "application/octet-stream":
+                file_path = os.path.join(directory_path, filename)
+                body_data = client_socket.recv(content_length)
+
+                with open(file_path, "wb") as file:
+                    file.write(body_data)
+
+                status = "201 Created"
+                headers = {
+                    "Content-Type": "text/plain",
+                    "Content-Length": "0"
+                }
+                body = ""
+                response(client_socket, status, headers, body)
+            else:
+                status = "400 Bad Request"
+                headers = {
+                    "Content-Type": "text/plain",
+                    "Content-Length": "0"
+                }
+                body = "Invalid Content-Type"
+                response(client_socket, status, headers, body)
+
+
         if parsed_request['path'] == "/":
             response(client_socket, status, headers, body)
         elif "/echo/" in parsed_request["path"]:
