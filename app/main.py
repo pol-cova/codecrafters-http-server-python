@@ -40,7 +40,7 @@ def handle_client(client_socket):
                 "Content-Type": "text/plain",
                 "Content-Length": content_length
             }
-            body = ""
+            body = body_data
             response(client_socket, status, headers, body)
         else:
             # Handle other requests or paths
