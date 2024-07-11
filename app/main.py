@@ -23,7 +23,7 @@ def handle_client(client_socket):
         }
         body = ""
 
-        if request_data["method"] == "POST":
+        if parsed_request["method"] == "POST":
             filename = parsed_request["path"].split("/files/")[1]
             content_type = parsed_request["headers"].get("Content-Type")
             content_length = int(parsed_request["headers"].get("Content-Length", 0))
