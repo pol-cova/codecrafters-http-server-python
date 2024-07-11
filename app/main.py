@@ -1,6 +1,15 @@
 # Uncomment this to pass the first stage
 import socket
 import threading
+import os
+import sys
+
+
+directory_path = ""
+for i, arg in enumerate(sys.argv):
+    if arg == "--directory" and i + 1 < len(sys.argv):
+        directory_path = sys.argv[i + 1]
+        break
 
 def handle_client(client_socket):
     try:
@@ -24,11 +33,12 @@ def handle_client(client_socket):
             headers["Content-Length"] = str(len(body))
             response(client_socket, status, headers, body)
         elif "/files/" in parsed_request["path"]:
+            file_path = os.path.join(directory_path, parsed_request["path"].replace("/files/", "", 1))
             try:
-                with open(parsed_request["path"].replace("/files/", ""), "r") as f:
+                with open(file_path, "rb") as f:
                     body = f.read()
-                    headers["Content-Length"] = str(len(body))
                     headers["Content-Type"] = "application/octet-stream"
+                    headers["Content-Length"] = str(len(body))
                     response(client_socket, status, headers, body)
             except FileNotFoundError:
                 status = "404 Not Found"
