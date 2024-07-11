@@ -13,11 +13,11 @@ def handle_client(client_socket):
             "Content-Length": "0"
         }
         body = ""
-        if "/echo/" in request_data["path"]:
-            body = request_data["path"].replace("/echo/", "")
+        if "/echo/" in request_data[1]:
+            body = request_data[1].replace("/echo/", "")
             headers["Content-Length"] = str(len(body))
-        elif "/user-agent" in request_data["path"]:
-            body = parsed_request["headers"]["User-Agent"]
+        elif "/user-agent" in request_data[1]:
+            body = parsed_request[3]["User-Agent"]
             headers["Content-Length"] = str(len(body))
         response(client_socket, status, headers, body)
 
