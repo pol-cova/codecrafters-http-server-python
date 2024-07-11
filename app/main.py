@@ -10,11 +10,7 @@ def main():
     #
     server_socket = socket.create_server(("localhost", 4221), reuse_port=True)
     # server_socket.accept() # wait for client
-    print(parser(server_socket))
-
-
-def parser(socket):
-    client_socket, addr = socket.accept()  # Unpack the tuple
+    client_socket, addr = server_socket.accept()  # Unpack the tuple
     request_data = client_socket.recv(1024).decode('utf-8')
 
     lines = request_data.split("\r\n")
@@ -27,9 +23,11 @@ def parser(socket):
     status_not_found = "HTTP/1.1 404 Not Found\r\n\r\n"
     if method == "GET":
         if path == "/":
-            return status_ok
+            client_socket.sendall(status_ok.encode('utf-8'))
         else:
-            return status_not_found
+            client_socket.sendall(status_not_found.encode('utf-8'))
+
+
 
 
 if __name__ == "__main__":
