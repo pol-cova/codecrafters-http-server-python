@@ -30,6 +30,9 @@ def main():
         header = line.split(': ')
         headers[header[0]] = header[1]
 
+    # print headers
+    print(headers)
+
     status_ok = "HTTP/1.1 200 OK\r\n"
     status_not_found = "HTTP/1.1 404 Not Found\r\n\r\n"
 
@@ -40,18 +43,18 @@ def main():
         response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 0\r\n\r\n"
         client_socket.sendall(response.encode('utf-8'))
 
-    elif "/echo/" in path:
-        req_param = path.split("/echo/")[1]
+    req_param = path.split("/")[1]
 
     if req_param is not None:
+        user_agent = headers.get('User-Agent')
         # response
         response_line = status_ok
         headers = {
             "Content-Type": "text/plain",
-            "Content-Length": len(req_param)
+            "Content-Length": len(user_agent)
         }
 
-        response_body = req_param
+        response_body = user_agent
 
         # Construct headers
         headers_str = ''.join(f'{key}: {value}\r\n' for key, value in headers.items())
