@@ -44,8 +44,9 @@ def main():
         response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 0\r\n\r\n"
         client_socket.sendall(response.encode('utf-8'))
         req_param = path.split("/")[1]
-    elif path == "/echo/":
+    elif "/echo/" in path:
         req_param = path.split("/echo/")[1]
+
     elif path == "/user-agent":
         req_param = headers.get("User-Agent")
 
