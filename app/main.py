@@ -23,6 +23,16 @@ def handle_client(client_socket):
             body = parsed_request["headers"].get("User-Agent", "")
             headers["Content-Length"] = str(len(body))
             response(client_socket, status, headers, body)
+        elif "/files" in parsed_request["path"]:
+            try:
+                with open(parsed_request["path"].replace("/files/", ""), "r") as f:
+                    body = f.read()
+                    headers["Content-Length"] = str(len(body))
+                    headers["Content-Type"] = "application/octet-stream"
+                    response(client_socket, status, headers, body)
+            except FileNotFoundError:
+                status = "404 Not Found"
+                response(client_socket, status, headers, body)
         else:
             status = "404 Not Found"
             response(client_socket, status, headers, body)
