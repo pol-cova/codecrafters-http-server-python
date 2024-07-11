@@ -75,8 +75,13 @@ def parse_request(request_data):
 def response(client_socket, status, headers, body):
     response_line = f"HTTP/1.1 {status}\r\n"
     headers_str = ''.join(f'{key}: {value}\r\n' for key, value in headers.items())
-    res = response_line + headers_str + '\r\n' + body
-    client_socket.sendall(res.encode('utf-8'))
+    # Prepare the headers and the separator as bytes
+    headers_bytes = (response_line + headers_str + '\r\n').encode('utf-8')
+    # Ensure the body is in bytes. If it's already bytes, this has no effect.
+    if isinstance(body, str):
+        body = body.encode('utf-8')
+    # Concatenate headers and body as bytes and send
+    client_socket.sendall(headers_bytes + body)
 
 def main():
     # You can use print statements as follows for debugging, they'll be visible when running tests.
