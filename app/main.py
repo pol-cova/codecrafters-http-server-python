@@ -13,14 +13,19 @@ def handle_client(client_socket):
             "Content-Length": "0"
         }
         body = ""
-        if "/echo/" in parsed_request["path"]:
+        if parsed_request['path'] == "/":
+            response(client_socket, status, headers, body)
+        elif "/echo/" in parsed_request["path"]:
             body = parsed_request["path"].replace("/echo/", "")
             headers["Content-Length"] = str(len(body))
+            response(client_socket, status, headers, body)
         elif "/user-agent" in parsed_request["path"]:
             body = parsed_request["headers"].get("User-Agent", "")
             headers["Content-Length"] = str(len(body))
-        response(client_socket, status, headers, body)
-
+            response(client_socket, status, headers, body)
+        else:
+            status = "404 Not Found"
+            response(client_socket, status, headers, body)
     finally:
         client_socket.close()
 
