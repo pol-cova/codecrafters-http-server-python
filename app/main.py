@@ -26,32 +26,21 @@ def handle_client(client_socket):
         if parsed_request["method"] == "POST" and parsed_request["path"].startswith("/files/"):
             filename = parsed_request["path"].split("/files/")[1]
             content_length = int(parsed_request["headers"].get("Content-Length", 0))
-            body_data = client_socket.recv(content_length)
+            body = client_socket.recv(content_length).decode('utf-8')
 
-            # Ensure the directory exists
-            os.makedirs(os.path.join(directory_path, "files"), exist_ok=True)
-            file_path = os.path.join(directory_path, "files", filename)
-
-            with open(file_path, "wb") as file:
-                file.write(body_data)
-
-            status = "201 Created"
-            headers = {
-                "Content-Type": "text/plain",
-                "Content-Length": content_length
-            }
-            body = body_data
-            response(client_socket, status, headers, body)
-        else:
-            # Handle other requests or paths
-            status = "404 Not Found"
-            headers = {
-                "Content-Type": "text/plain",
-                "Content-Length": "0"
-            }
-            body = ""
-            response(client_socket, status, headers, body)
-
+            file_path = os.path.join(directory_path, filename)
+            try:
+                with open(file_path, "w") as f:
+                    f.write(body)
+                status = "201 Created"
+                headers = {}
+                body = ""
+                response(client_socket, status, headers, body)
+            except Exception as e:
+                status = "500 Internal Server Error"
+                headers = {}
+                body = "Error writing file"
+                response(client_socket, status, headers, body)
 
         if parsed_request['path'] == "/":
             response(client_socket, status, headers, body)
