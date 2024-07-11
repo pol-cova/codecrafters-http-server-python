@@ -23,33 +23,34 @@ def handle_client(client_socket):
         }
         body = ""
 
-        if parsed_request["method"] == "POST":
+        if parsed_request["method"] == "POST" and parsed_request["path"].startswith("/files/"):
             filename = parsed_request["path"].split("/files/")[1]
-            content_type = parsed_request["headers"].get("Content-Type")
             content_length = int(parsed_request["headers"].get("Content-Length", 0))
+            body_data = client_socket.recv(content_length)
 
-            if content_type == "application/octet-stream":
-                file_path = os.path.join(directory_path, filename)
-                body_data = client_socket.recv(content_length)
+            # Ensure the directory exists
+            os.makedirs(os.path.join(directory_path, "files"), exist_ok=True)
+            file_path = os.path.join(directory_path, "files", filename)
 
-                with open(file_path, "wb") as file:
-                    file.write(body_data)
+            with open(file_path, "wb") as file:
+                file.write(body_data)
 
-                status = "201 Created"
-                headers = {
-                    "Content-Type": "text/plain",
-                    "Content-Length": "0"
-                }
-                body = ""
-                response(client_socket, status, headers, body)
-            else:
-                status = "400 Bad Request"
-                headers = {
-                    "Content-Type": "text/plain",
-                    "Content-Length": "0"
-                }
-                body = "Invalid Content-Type"
-                response(client_socket, status, headers, body)
+            status = "201 Created"
+            headers = {
+                "Content-Type": "text/plain",
+                "Content-Length": content_length
+            }
+            body = ""
+            response(client_socket, status, headers, body)
+        else:
+            # Handle other requests or paths
+            status = "404 Not Found"
+            headers = {
+                "Content-Type": "text/plain",
+                "Content-Length": "0"
+            }
+            body = ""
+            response(client_socket, status, headers, body)
 
 
         if parsed_request['path'] == "/":
