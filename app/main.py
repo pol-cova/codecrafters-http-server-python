@@ -3,6 +3,7 @@ import socket
 import threading
 import os
 import sys
+import gzip
 
 
 directory_path = ""
@@ -46,7 +47,10 @@ def handle_client(client_socket):
             response(client_socket, status, headers, body)
         elif "/echo/" in parsed_request["path"]:
             body = parsed_request["path"].replace("/echo/", "")
-            headers["Content-Length"] = str(len(body))
+            compressed_body = gzip.compress(body)
+            headers["Content-Encoding"] = "gzip"
+            headers["Content-Length"] = str(len(compressed_body))
+            # headers["Content-Length"] = str(len(body))
             response(client_socket, status, headers, body)
         elif "/user-agent" in parsed_request["path"]:
             body = parsed_request["headers"].get("User-Agent", "")
