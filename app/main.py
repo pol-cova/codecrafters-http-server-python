@@ -50,8 +50,7 @@ def handle_client(client_socket):
             compressed_body = gzip.compress(body.encode("utf-8"))
             headers["Content-Encoding"] = "gzip"
             headers["Content-Length"] = str(len(compressed_body))
-            # headers["Content-Length"] = str(len(body))
-            response(client_socket, status, headers, body)
+            response(client_socket, status, headers, compressed_body, is_binary=True)
         elif "/user-agent" in parsed_request["path"]:
             body = parsed_request["headers"].get("User-Agent", "")
             headers["Content-Length"] = str(len(body))
@@ -96,15 +95,14 @@ def parse_request(request_data):
         "body": body
     }
 
-def response(client_socket, status, headers, body):
+def response(client_socket, status, headers, body, is_binary=False):
     response_line = f"HTTP/1.1 {status}\r\n"
     headers_str = ''.join(f'{key}: {value}\r\n' for key, value in headers.items())
-    # Prepare the headers and the separator as bytes
     headers_bytes = (response_line + headers_str + '\r\n').encode('utf-8')
-    # Ensure the body is in bytes. If it's already bytes, this has no effect.
-    if isinstance(body, str):
+
+    if not is_binary:
         body = body.encode('utf-8')
-    # Concatenate headers and body as bytes and send
+
     client_socket.sendall(headers_bytes + body)
 
 def main():
