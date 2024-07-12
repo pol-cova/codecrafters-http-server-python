@@ -48,7 +48,8 @@ def handle_client(client_socket):
         elif "/echo/" in parsed_request["path"]:
             body = parsed_request["path"].replace("/echo/", "")
             compressed_body = gzip.compress(body.encode("utf-8"))
-            headers["Content-Encoding"] = "gzip"
+            if headers.get("Accept-Encoding", "") == "gzip":
+                headers["Content-Encoding"] = "gzip"
             headers["Content-Length"] = str(len(compressed_body))
             response(client_socket, status, headers, compressed_body, is_binary=True)
         elif "/user-agent" in parsed_request["path"]:
