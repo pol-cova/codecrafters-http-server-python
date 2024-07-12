@@ -107,7 +107,8 @@ def response(client_socket, status, headers, body, is_binary=False):
     headers_str = ''.join(f'{key}: {value}\r\n' for key, value in headers.items())
     headers_bytes = (response_line + headers_str + '\r\n').encode('utf-8')
 
-    if not is_binary:
+    # Ensure body is a bytes-like object before concatenation
+    if not is_binary and isinstance(body, str):
         body = body.encode('utf-8')
 
     client_socket.sendall(headers_bytes + body)
