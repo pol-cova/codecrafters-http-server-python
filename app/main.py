@@ -54,7 +54,7 @@ def handle_client(client_socket):
                 headers["Content-Encoding"] = "gzip"
                 body_bytes = compressed_body
             else:
-                body_bytes = body.encode("utf-8")
+                body_bytes = body
 
             headers["Content-Length"] = str(len(body_bytes))
             response(client_socket, status, headers, body_bytes, is_binary=True)
