@@ -47,11 +47,17 @@ def handle_client(client_socket):
             response(client_socket, status, headers, body)
         elif "/echo/" in parsed_request["path"]:
             body = parsed_request["path"].replace("/echo/", "")
-            compressed_body = gzip.compress(body.encode("utf-8"))
-            if headers.get("Accept-Encoding", "") == "gzip":
+            accept_encoding = parsed_request["headers"].get("Accept-Encoding", "")
+
+            if "gzip" in accept_encoding:
+                compressed_body = gzip.compress(body.encode("utf-8"))
                 headers["Content-Encoding"] = "gzip"
-            headers["Content-Length"] = str(len(compressed_body))
-            response(client_socket, status, headers, compressed_body, is_binary=True)
+                body_bytes = compressed_body
+            else:
+                body_bytes = body.encode("utf-8")
+
+            headers["Content-Length"] = str(len(body_bytes))
+            response(client_socket, status, headers, body_bytes, is_binary=True)
         elif "/user-agent" in parsed_request["path"]:
             body = parsed_request["headers"].get("User-Agent", "")
             headers["Content-Length"] = str(len(body))
