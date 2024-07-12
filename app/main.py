@@ -47,7 +47,7 @@ def handle_client(client_socket):
             response(client_socket, status, headers, body)
         elif "/echo/" in parsed_request["path"]:
             body = parsed_request["path"].replace("/echo/", "")
-            compressed_body = gzip.compress(body)
+            compressed_body = gzip.compress(body.encode("utf-8"))
             headers["Content-Encoding"] = "gzip"
             headers["Content-Length"] = str(len(compressed_body))
             # headers["Content-Length"] = str(len(body))
